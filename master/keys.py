@@ -1,0 +1,10 @@
+SUCCESS = 'success'
+MESSAGE = 'message'
+DATA = 'data'
+ACCESS_TOKEN = 'access_token'
+REFRESH_TOKEN = 'refresh_token'
+
+TOTAL_PAGE = 'total_page'
+PAGE_NUMBER = 'page_number'
+PAGE_COUNT = 'page_count'
+TOTAL_COUNT = 'total_count'

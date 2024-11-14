@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Tailwebs</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #e0e0e0;
+        }
+        .container {
+            text-align: center;
+        }
+        .logo {
+            font-size: 2em;
+            color: #d9534f;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .login-box {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 420px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #333;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .password-container {
+            position: relative;
+        }
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 68%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+			min-width: 20%;
+        }
+        .login-button, .register-button {
+            width: 100%;
+            padding: 10px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        .register-button {
+            background-color: #555;
+        }
+		.register-button:hover{
+			background-color: #333;
+		}
+        .message {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .message.error {
+            color: red;
+        }
+        .message.success {
+            color: green;
+        }
+		.forgot-password{
+			text-align: right;
+		}
+		
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="logo">tailwebs.</div>
+    <div class="login-box">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" placeholder="Enter your username">
+        </div>
+
+		<div class="form-group password-container">
+			<label for="password">Password</label>
+			<input type="password" id="password" placeholder="Enter your password">
+			<button class="toggle-password" onclick="togglePassword()">Show</button>
+		</div>
+
+		<div class="forgot-password">
+			<a href="#"  onclick="handleForgotPassword()">Forgot Password?</a>
+
+        </div>
+        <button class="login-button" onclick="login()">Login</button>
+		<b>OR
+        <button class="register-button" onclick="redirectToRegister()">Register</button>
+        <div id="message" class="message"></div>
+    </div>
+</div>
+
+<script>
+
+	function togglePassword() {
+		const passwordInput = document.getElementById("password");
+		const toggleButton = document.querySelector(".toggle-password");
+
+		if (passwordInput.type === "password") {
+			passwordInput.type = "text";
+			toggleButton.textContent = "Hide";
+		} else {
+			passwordInput.type = "password";
+			toggleButton.textContent = "Show";
+		}
+	}
+
+
+    function redirectToRegister() {
+        window.location.href = 'signup.html';
+    }
+
+    async function login() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const messageDiv = document.getElementById('message');
+
+        const payload = {
+            username: username,
+            password: password
+        };
+
+        try {
+            const response = await fetch('http://localhost:8000/account/api/login/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (response.status === 200) {
+                messageDiv.textContent = "Login successful!";
+                messageDiv.className = "message success";
+                localStorage.setItem('access_token', data.access_token);
+                localStorage.setItem('refresh_token', data.refresh_token);
+				window.location.href = 'dashboard.html';
+            } else if (response.status === 400) {
+                messageDiv.textContent = data.message;
+                messageDiv.className = "message error";
+            }
+        } catch (error) {
+            console.error("Error logging in:", error);
+            messageDiv.textContent = "An error occurred. Please try again.";
+            messageDiv.className = "message error";
+        }
+    }
+
+	async function handleForgotPassword() {
+        const username = document.getElementById('username').value;
+
+        if (!username) {
+            alert("Please enter username.");
+            return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:8000/account/api/forgot-password/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username: username })
+            });
+            
+            const data = await response.json();
+
+			if (response.status === 200) {
+                alert(data.message + ": " + data.data);
+            } else if (response.status === 400) {
+                alert(data.message);
+            }
+
+        } catch (error) {
+            alert("Failed to connect to the server.");
+        }
+    }
+</script>
+
+</body>
+</html>
